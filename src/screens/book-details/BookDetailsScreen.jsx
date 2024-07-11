@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {View, Text, Image, ScrollView, TouchableOpacity} from 'react-native';
+import {useDispatch, useSelector} from 'react-redux';
 import {ActivityIndicator} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/AntDesign';
 import {useNavigation, useRoute} from '@react-navigation/native';
@@ -12,6 +13,10 @@ import {
   DEFAULT_BASE_COVER_IMAGE_URL,
   DEFAULT_COVER_IMAGE_URL,
 } from '../../services/api/Api.constants';
+import {
+  addToFavorites,
+  removeFromFavorites,
+} from '../../services/redux/actions';
 
 const TOP_TAB_BARS = {
   DESCRIPTION: 'description',
@@ -25,7 +30,9 @@ const BookDetailsScreen = () => {
   const [bookDetails, setBoookDetails] = useState(book);
   const [selectedTab, setSelectedTab] = useState(TOP_TAB_BARS.DESCRIPTION);
 
+  const dispatch = useDispatch();
   const navigation = useNavigation();
+  const favorites = useSelector(state => state.reducer.favorites);
 
   useEffect(() => {
     _fetchBookDetails();
@@ -95,7 +102,17 @@ const BookDetailsScreen = () => {
     navigation.goBack();
   };
 
-  const handleHeartPress = () => {};
+  const isBookInFavorites = () => {
+    return favorites.some(book => book.key === bookDetails.key);
+  };
+
+  const handleHeartPress = () => {
+    if (isBookInFavorites()) {
+      dispatch(removeFromFavorites(bookDetails.key));
+    } else {
+      dispatch(addToFavorites(bookDetails));
+    }
+  };
 
   const renderHeader = () => (
     <View style={styles.headerContainer}>
@@ -104,7 +121,11 @@ const BookDetailsScreen = () => {
       </TouchableOpacity>
       <Text style={styles.headerTitle}>{localStrings.bookDetails}</Text>
       <TouchableOpacity onPress={handleHeartPress} style={styles.iconContainer}>
-        <Icon name="hearto" size={22} color={colors.brown.dark} />
+        <Icon
+          name={isBookInFavorites() ? 'heart' : 'hearto'}
+          size={22}
+          color={colors.brown.dark}
+        />
       </TouchableOpacity>
     </View>
   );

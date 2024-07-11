@@ -21,6 +21,8 @@ export const localStrings = new LocalizedStrings({
     people: 'People',
     places: 'Places',
     times: 'Times',
+    favoritesList: 'Favorites List',
+    emptyMessage: `Oh, you've got nothing`,
   },
   it: {
     rating: 'Valutazione',
@@ -42,6 +44,8 @@ export const localStrings = new LocalizedStrings({
     people: 'Persone',
     places: 'Luoghi',
     times: 'Epoche',
+    favoritesList: 'Lista dei preferiti',
+    emptyMessage: 'Oh, non hai niente',
   },
 });
 
