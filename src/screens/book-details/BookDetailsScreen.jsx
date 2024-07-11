@@ -27,7 +27,7 @@ const BookDetailsScreen = () => {
   const route = useRoute();
   const {book} = route.params;
   const [loading, setLoading] = useState(false);
-  const [bookDetails, setBoookDetails] = useState(book);
+  const [bookDetails, setBookDetails] = useState(book);
   const [selectedTab, setSelectedTab] = useState(TOP_TAB_BARS.DESCRIPTION);
 
   const dispatch = useDispatch();
@@ -42,7 +42,7 @@ const BookDetailsScreen = () => {
     setLoading(true);
     fetchBookDetails(bookDetails.key)
       .then(res => {
-        setBoookDetails(prevDetails => ({
+        setBookDetails(prevDetails => ({
           ...prevDetails,
           description:
             typeof res.description === 'object'
