@@ -20,3 +20,23 @@ export const fetchBookList = (query, limit, offset) =>
       console.log('fetchBookList catch Error: ', err);
     }
   });
+
+export const fetchBookDetails = key =>
+  new Promise(async (resolve, reject) => {
+    try {
+      const url = `${DEFAULT_BASE_URL}${key}.json`;
+
+      axios
+        .get(url)
+        .then(res => {
+          resolve(res.data);
+        })
+        .catch(err => {
+          reject(err);
+          console.log('Fetch book details Error: ', err);
+        });
+    } catch (err) {
+      reject(err);
+      console.log('fetchBookDetails catch Error: ', err);
+    }
+  });
