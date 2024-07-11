@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useMemo, useCallback} from 'react';
 import {View, Text, Image, ScrollView, TouchableOpacity} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {ActivityIndicator} from 'react-native-paper';
@@ -38,44 +38,44 @@ const BookDetailsScreen = () => {
     _fetchBookDetails();
   }, []);
 
-  const _fetchBookDetails = () => {
+  const _fetchBookDetails = useCallback(() => {
     setLoading(true);
     fetchBookDetails(bookDetails.key)
       .then(res => {
-        setBoookDetails({
-          ...bookDetails,
+        setBoookDetails(prevDetails => ({
+          ...prevDetails,
           description:
-            typeof res.description == 'object'
+            typeof res.description === 'object'
               ? res.description?.value
               : res.description,
           subjects: res.subjects,
           subject_times: res.subject_times,
           subject_places: res.subject_places,
           subject_people: res.subject_people,
-        });
+        }));
       })
       .catch(err => {
-        console.log('error in fetch book details');
+        console.error('Error in fetching book details:', err);
       })
       .finally(() => {
         setLoading(false);
       });
-  };
+  }, [bookDetails.key]);
 
-  const prepareDetailsData = () => {
-    const detailsData = [
+  const prepareDetailsData = useMemo(
+    () => [
       {label: localStrings.publishYear, value: bookDetails.first_publish_year},
       {label: localStrings.review, value: bookDetails.ratings_count},
       {
         label: localStrings.rating,
         value: bookDetails.ratings_average?.toFixed(1),
       },
-    ];
-    return detailsData;
-  };
+    ],
+    [bookDetails],
+  );
 
-  const prepareAddtionalsDetailsData = () => {
-    const additionalDetails = [
+  const prepareAddtionalsDetailsData = useMemo(
+    () => [
       {label: localStrings.wantToRead, value: bookDetails.want_to_read_count},
       {
         label: localStrings.currentlyReading,
@@ -94,44 +94,51 @@ const BookDetailsScreen = () => {
         value: bookDetails.subject_places?.join(', '),
       },
       {label: localStrings.times, value: bookDetails.subject_times?.join(', ')},
-    ];
-    return additionalDetails;
-  };
+    ],
+    [bookDetails],
+  );
 
   const handleBackPress = () => {
     navigation.goBack();
   };
 
-  const isBookInFavorites = () => {
+  const isBookInFavorites = useMemo(() => {
     return favorites.some(book => book.key === bookDetails.key);
-  };
+  }, [favorites, bookDetails.key]);
 
-  const handleHeartPress = () => {
-    if (isBookInFavorites()) {
+  const handleHeartPress = useCallback(() => {
+    if (isBookInFavorites) {
       dispatch(removeFromFavorites(bookDetails.key));
     } else {
       dispatch(addToFavorites(bookDetails));
     }
-  };
+  }, [isBookInFavorites, dispatch, bookDetails]);
 
-  const renderHeader = () => (
-    <View style={styles.headerContainer}>
-      <TouchableOpacity onPress={handleBackPress} style={styles.iconContainer}>
-        <Icon name="arrowleft" size={22} color={colors.brown.dark} />
-      </TouchableOpacity>
-      <Text style={styles.headerTitle}>{localStrings.bookDetails}</Text>
-      <TouchableOpacity onPress={handleHeartPress} style={styles.iconContainer}>
-        <Icon
-          name={isBookInFavorites() ? 'heart' : 'hearto'}
-          size={22}
-          color={colors.brown.dark}
-        />
-      </TouchableOpacity>
-    </View>
+  const renderHeader = useCallback(
+    () => (
+      <View style={styles.headerContainer}>
+        <TouchableOpacity
+          onPress={handleBackPress}
+          style={styles.iconContainer}>
+          <Icon name="arrowleft" size={22} color={colors.brown.dark} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>{localStrings.bookDetails}</Text>
+        <TouchableOpacity
+          onPress={handleHeartPress}
+          style={styles.iconContainer}>
+          <Icon
+            name={isBookInFavorites ? 'heart' : 'hearto'}
+            size={22}
+            color={colors.brown.dark}
+          />
+        </TouchableOpacity>
+      </View>
+    ),
+    [handleBackPress, handleHeartPress, isBookInFavorites],
   );
 
-  const renderBookInfo = () => {
-    return (
+  const renderBookInfo = useCallback(
+    () => (
       <View style={styles.bookInfoContainer}>
         <Image
           source={{
@@ -146,7 +153,7 @@ const BookDetailsScreen = () => {
           {bookDetails.author_name?.join(', ')}
         </Text>
         <View style={styles.detailsBox}>
-          {prepareDetailsData().map((item, index) => (
+          {prepareDetailsData.map((item, index) => (
             <View style={styles.detailsBoxItem} key={index}>
               <Text style={styles.detailsTextLabel}>{item.label}</Text>
               <Text style={styles.detailsText}>{item.value || '-'}</Text>
@@ -154,8 +161,9 @@ const BookDetailsScreen = () => {
           ))}
         </View>
       </View>
-    );
-  };
+    ),
+    [bookDetails, prepareDetailsData],
+  );
 
   const renderTopBar = () => (
     <View style={styles.topBarContainer}>
@@ -178,20 +186,23 @@ const BookDetailsScreen = () => {
     </View>
   );
 
-  const renderDescription = () => {
-    const {description} = bookDetails;
-
-    return (
-      <Text style={[styles.contentText, !description && {textAlign: 'center'}]}>
-        {description || localStrings.noDescription}
+  const renderDescription = useCallback(
+    () => (
+      <Text
+        style={[
+          styles.contentText,
+          !bookDetails.description && {textAlign: 'center'},
+        ]}>
+        {bookDetails.description || localStrings.noDescription}
       </Text>
-    );
-  };
+    ),
+    [bookDetails.description],
+  );
 
-  const renderAdditionalDetails = () => {
-    return (
+  const renderAdditionalDetails = useCallback(
+    () => (
       <View style={styles.additionalDetailsContainer}>
-        {prepareAddtionalsDetailsData().map((item, index) => (
+        {prepareAddtionalsDetailsData.map((item, index) => (
           <View key={index} style={styles.additionalDetailsItem}>
             <Text style={styles.additionalDetailsItemLabel}>{item.label}</Text>
             <Text style={styles.additionalDetailsItemValue}>
@@ -200,13 +211,17 @@ const BookDetailsScreen = () => {
           </View>
         ))}
       </View>
-    );
-  };
+    ),
+    [bookDetails, prepareAddtionalsDetailsData],
+  );
 
-  const renderContent = () =>
-    selectedTab === TOP_TAB_BARS.DESCRIPTION
-      ? renderDescription()
-      : renderAdditionalDetails();
+  const renderContent = useCallback(
+    () =>
+      selectedTab === TOP_TAB_BARS.DESCRIPTION
+        ? renderDescription()
+        : renderAdditionalDetails(),
+    [selectedTab, renderDescription, renderAdditionalDetails],
+  );
 
   if (loading) {
     return (
