@@ -2,7 +2,8 @@ export default {
   brown: {
     dark: '#583620',
     medium: '#956B62',
-    light: '#D7C8C4',
+    light: '#E7E1D1',
+    lighter: '#F4F2EB',
   },
   text: {
     white: '#FFFFFF',
