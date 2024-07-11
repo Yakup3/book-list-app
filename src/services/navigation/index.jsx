@@ -72,7 +72,7 @@ const Navigation = () => {
 
 const styles = StyleSheet.create({
   tabBarNavigator: {
-    width: ScreenWidth * 0.8,
+    width: ScreenWidth * 0.85,
     height: ScreenHeight * 0.08,
     alignSelf: 'center',
     borderRadius: ScreenWidth * 0.05,
