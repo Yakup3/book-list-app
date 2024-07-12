@@ -7,10 +7,11 @@ import styles from './FavoritesScreen.style';
 import {PAGES} from '../../shared/constants';
 import {localStrings} from '../../shared/localization';
 import BookItem from '../../shared/components/BookItem';
+import BookItemListView from '../../shared/components/BookItemListView';
 
 const FavoritesScreen = () => {
   const navigation = useNavigation();
-  const {favorites} = useSelector(state => state.reducer);
+  const {favorites, isCardView} = useSelector(state => state.reducer);
 
   const handleOnPressBookItem = item => {
     navigation.navigate(PAGES.BOOKDETAILS, {book: item});
@@ -25,9 +26,19 @@ const FavoritesScreen = () => {
     () => (
       <FlatList
         data={favorites}
-        renderItem={({item}) => (
-          <BookItem item={item} handleOnPressBookItem={handleOnPressBookItem} />
-        )}
+        renderItem={({item}) =>
+          isCardView ? (
+            <BookItem
+              item={item}
+              handleOnPressBookItem={handleOnPressBookItem}
+            />
+          ) : (
+            <BookItemListView
+              item={item}
+              handleOnPressBookItem={handleOnPressBookItem}
+            />
+          )
+        }
         showsVerticalScrollIndicator={false}
         keyExtractor={(item, index) => `${item.key}-${index}`}
         contentContainerStyle={styles.bookList}
@@ -35,7 +46,7 @@ const FavoritesScreen = () => {
         key={2}
       />
     ),
-    [favorites, handleOnPressBookItem],
+    [favorites, isCardView, handleOnPressBookItem],
   );
 
   const renderPlaceholder = useCallback(

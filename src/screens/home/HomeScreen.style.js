@@ -31,11 +31,20 @@ export default StyleSheet.create({
   bookList: {
     paddingBottom: 16,
   },
+  searchResultCountContainer: {
+    marginBottom: 10,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
   searchResultCount: {
     fontSize: 16,
     fontWeight: '700',
-    marginBottom: 10,
     color: colors.brown.medium,
+  },
+  displayOptionIcons: {
+    gap: 10,
+    flexDirection: 'row',
   },
   placeholderContainer: {
     flex: 1,

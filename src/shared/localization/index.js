@@ -53,4 +53,4 @@ export const localStrings = new LocalizedStrings({
   },
 });
 
-localStrings.setLanguage('it');
+localStrings.setLanguage('en');
