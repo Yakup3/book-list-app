@@ -5,6 +5,7 @@ import {ScreenWidth} from '../../shared/constants';
 export default StyleSheet.create({
   container: {
     flex: 1,
+    marginTop: 10,
     paddingHorizontal: ScreenWidth * 0.075,
     backgroundColor: colors.brown.lighter,
   },

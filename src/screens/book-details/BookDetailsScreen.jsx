@@ -227,15 +227,14 @@ const BookDetailsScreen = () => {
 
   const renderSnackbar = useCallback(
     () => (
-      <View>
-        <Snackbar
-          duration={1500}
-          style={styles.snackbarMessage}
-          visible={isSnackbarVisible}
-          onDismiss={() => setIsSnackbarVisible(false)}>
-          <Text style={styles.snackbarMessageText}>{snackbarMessage}</Text>
-        </Snackbar>
-      </View>
+      <Snackbar
+        wrapperStyle={styles.snackbarWrapper}
+        duration={1000}
+        style={styles.snackbarMessage}
+        visible={isSnackbarVisible}
+        onDismiss={() => setIsSnackbarVisible(false)}>
+        <Text style={styles.snackbarMessageText}>{snackbarMessage}</Text>
+      </Snackbar>
     ),
     [isSnackbarVisible, snackbarMessage],
   );

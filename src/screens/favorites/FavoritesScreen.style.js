@@ -10,7 +10,6 @@ export default StyleSheet.create({
   },
   header: {
     fontSize: 24,
-    marginBottom: 20,
     fontWeight: 'bold',
     color: colors.brown.dark,
   },
