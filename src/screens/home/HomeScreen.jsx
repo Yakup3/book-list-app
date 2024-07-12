@@ -17,16 +17,21 @@ import {PAGES} from '../../shared/constants';
 import {localStrings} from '../../shared/localization';
 import BookItem from '../../shared/components/BookItem';
 import {fetchBookList} from '../../services/api/requests';
+import BookItemListView from '../../shared/components/BookItemListView';
+import DisplayOptionIcon from '../../shared/components/DisplayOptionIcon';
+import {useDispatch} from 'react-redux';
+import {changeItemDisplay} from '../../services/redux/actions';
 
 const HomeScreen = () => {
   const [books, setBooks] = useState([]);
   const [limit] = useState(10);
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [isCardView, setIsCardView] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchIcon, setIsSearchIcon] = useState(true);
-  const [searchResultCount, setSearchResultCount] = useState();
+  const [searchResultCount, setSearchResultCount] = useState(-1);
 
   const navigation = useNavigation();
 
@@ -71,6 +76,7 @@ const HomeScreen = () => {
       setBooks([]);
       setIsSearchIcon(true);
       setOffset(0);
+      setSearchResultCount(-1);
     }
   }, [loading, isLoadingMore]);
 
@@ -104,15 +110,49 @@ const HomeScreen = () => {
     [searchQuery, isSearchIcon, handleSearchIconPress, handleClearIconPress],
   );
 
-  const renderSearchResultCount = useCallback(
-    () =>
-      !loading &&
-      books.length > 0 && (
+  const dispatch = useDispatch();
+
+  const renderDisplayOptionIcons = useCallback(() => {
+    return (
+      <View style={styles.displayOptionIcons}>
+        <DisplayOptionIcon
+          name={'format-list-bulleted'}
+          size={22}
+          color={colors.brown.medium}
+          isActive={!isCardView}
+          handleOnPressIcon={() => {
+            dispatch(changeItemDisplay(!isCardView));
+            setIsCardView(prevState => !prevState);
+          }}
+        />
+        <DisplayOptionIcon
+          name={'cards-variant'}
+          size={22}
+          color={colors.brown.medium}
+          isActive={isCardView}
+          handleOnPressIcon={() => {
+            dispatch(changeItemDisplay(!isCardView));
+            setIsCardView(prevState => !prevState);
+          }}
+        />
+      </View>
+    );
+  }, [isCardView]);
+
+  const renderSearchResultCountContainer = useCallback(
+    () => (
+      <View style={styles.searchResultCountContainer}>
         <Text style={styles.searchResultCount}>
-          {`${localStrings.searchResult}: ${books.length} / ${searchResultCount}`}
+          {`${localStrings.searchResult}: ${
+            searchResultCount !== -1
+              ? books.length + ' / ' + searchResultCount
+              : '-'
+          }`}
         </Text>
-      ),
-    [loading, books, searchResultCount],
+        {renderDisplayOptionIcons()}
+      </View>
+    ),
+    [books.length, searchResultCount, renderDisplayOptionIcons],
   );
 
   const renderBookList = useCallback(
@@ -121,17 +161,24 @@ const HomeScreen = () => {
       books.length > 0 && (
         <FlatList
           data={books}
-          renderItem={({item}) => (
-            <BookItem
-              item={item}
-              handleOnPressBookItem={handleOnPressBookItem}
-            />
-          )}
+          renderItem={({item}) =>
+            isCardView ? (
+              <BookItem
+                item={item}
+                handleOnPressBookItem={handleOnPressBookItem}
+              />
+            ) : (
+              <BookItemListView
+                item={item}
+                handleOnPressBookItem={handleOnPressBookItem}
+              />
+            )
+          }
           showsVerticalScrollIndicator={false}
           keyExtractor={(item, index) => `${item.key}-${index}`}
           contentContainerStyle={styles.bookList}
-          numColumns={2}
-          key={2}
+          numColumns={isCardView ? 2 : 1}
+          key={isCardView ? 2 : 1}
           onEndReached={handleLoadMoreBooks}
           onEndReachedThreshold={0.2}
           ListFooterComponent={() =>
@@ -141,7 +188,14 @@ const HomeScreen = () => {
           }
         />
       ),
-    [loading, books, isLoadingMore, handleOnPressBookItem, handleLoadMoreBooks],
+    [
+      loading,
+      books,
+      isCardView,
+      isLoadingMore,
+      handleOnPressBookItem,
+      handleLoadMoreBooks,
+    ],
   );
 
   const renderPlaceholder = useCallback(
@@ -177,7 +231,7 @@ const HomeScreen = () => {
   return (
     <View style={styles.container}>
       {renderSearchBar()}
-      {renderSearchResultCount()}
+      {renderSearchResultCountContainer()}
       {renderBookList()}
       {renderPlaceholder()}
       {renderActivityIndicator()}

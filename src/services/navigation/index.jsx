@@ -45,7 +45,7 @@ const Navigation = () => {
             ...styles.tabBarNavigator,
             ...styles.tabBarShadow,
           },
-          tabBarActiveTintColor: colors.text.white,
+          tabBarActiveTintColor: colors.brown.light,
           tabBarInactiveTintColor: colors.brown.light,
           tabBarShowLabel: false,
           headerShown: false,
