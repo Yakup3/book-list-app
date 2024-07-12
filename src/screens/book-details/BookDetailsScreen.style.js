@@ -118,4 +118,12 @@ export default StyleSheet.create({
     marginRight: 10,
     color: colors.brown.dark,
   },
+  snackbarMessage: {
+    backgroundColor: colors.brown.medium,
+  },
+  snackbarMessageText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.brown.light,
+  },
 });
