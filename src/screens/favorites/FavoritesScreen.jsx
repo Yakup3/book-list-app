@@ -42,8 +42,8 @@ const FavoritesScreen = () => {
         showsVerticalScrollIndicator={false}
         keyExtractor={(item, index) => `${item.key}-${index}`}
         contentContainerStyle={styles.bookList}
-        numColumns={2}
-        key={2}
+        numColumns={isCardView ? 2 : 1}
+        key={isCardView ? 2 : 1}
       />
     ),
     [favorites, isCardView, handleOnPressBookItem],

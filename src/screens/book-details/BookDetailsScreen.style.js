@@ -118,6 +118,10 @@ export default StyleSheet.create({
     marginRight: 10,
     color: colors.brown.dark,
   },
+  snackbarWrapper: {
+    bottom: 20,
+    alignSelf: 'center',
+  },
   snackbarMessage: {
     backgroundColor: colors.brown.medium,
   },

@@ -4,6 +4,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/Ionicons';
+import {useKeyboard} from '@react-native-community/hooks';
 import 'react-native-gesture-handler';
 // ? Screens
 import HomeScreen from '../../screens/home/HomeScreen';
@@ -18,6 +19,8 @@ const Stack = createStackNavigator();
 
 const Navigation = () => {
   const TabNavigator = () => {
+    const keyboard = useKeyboard();
+
     const renderTabBarIcon = (color, size, focused, route) => {
       let iconName;
 
@@ -30,7 +33,7 @@ const Navigation = () => {
       return (
         <View style={styles.tabBarButton}>
           <Icon name={iconName} color={color} size={size} />
-          <Text style={styles.tabBarLabel(color, focused)}>{route.name}</Text>
+          <Text style={styles.tabBarLabel(color)}>{route.name}</Text>
         </View>
       );
     };
@@ -44,7 +47,11 @@ const Navigation = () => {
           tabBarStyle: {
             ...styles.tabBarNavigator,
             ...styles.tabBarShadow,
+            ...{
+              marginBottom: keyboard.keyboardShown ? 0 : 10,
+            },
           },
+          tabBarHideOnKeyboard: true,
           tabBarActiveTintColor: colors.brown.light,
           tabBarInactiveTintColor: colors.brown.light,
           tabBarShowLabel: false,
@@ -86,7 +93,6 @@ const styles = StyleSheet.create({
   },
   tabBarLabel: (color, focused) => ({
     color: color,
-    fontWeight: focused && 600,
     textTransform: 'capitalize',
   }),
 });
