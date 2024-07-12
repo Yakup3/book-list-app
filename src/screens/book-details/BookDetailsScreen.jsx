@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useMemo, useCallback} from 'react';
 import {View, Text, Image, ScrollView, TouchableOpacity} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
-import {ActivityIndicator} from 'react-native-paper';
+import {ActivityIndicator, Snackbar} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/AntDesign';
 import {useNavigation, useRoute} from '@react-navigation/native';
 
@@ -28,6 +28,8 @@ const BookDetailsScreen = () => {
   const {book} = route.params;
   const [loading, setLoading] = useState(false);
   const [bookDetails, setBookDetails] = useState(book);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [isSnackbarVisible, setIsSnackbarVisible] = useState(false);
   const [selectedTab, setSelectedTab] = useState(TOP_TAB_BARS.DESCRIPTION);
 
   const dispatch = useDispatch();
@@ -74,7 +76,7 @@ const BookDetailsScreen = () => {
     [bookDetails],
   );
 
-  const prepareAddtionalsDetailsData = useMemo(
+  const prepareAdditionalDetailsData = useMemo(
     () => [
       {label: localStrings.wantToRead, value: bookDetails.want_to_read_count},
       {
@@ -109,8 +111,12 @@ const BookDetailsScreen = () => {
   const handleHeartPress = useCallback(() => {
     if (isBookInFavorites) {
       dispatch(removeFromFavorites(bookDetails.key));
+      setIsSnackbarVisible(true);
+      setSnackbarMessage(localStrings.removeFromFavorites);
     } else {
       dispatch(addToFavorites(bookDetails));
+      setIsSnackbarVisible(true);
+      setSnackbarMessage(localStrings.addedToFavorites);
     }
   }, [isBookInFavorites, dispatch, bookDetails]);
 
@@ -165,25 +171,29 @@ const BookDetailsScreen = () => {
     [bookDetails, prepareDetailsData],
   );
 
-  const renderTopBar = () => (
-    <View style={styles.topBarContainer}>
-      <TouchableOpacity
-        style={[
-          styles.tab,
-          selectedTab === TOP_TAB_BARS.DESCRIPTION && styles.selectedTab,
-        ]}
-        onPress={() => setSelectedTab(TOP_TAB_BARS.DESCRIPTION)}>
-        <Text style={styles.tabText}>{localStrings.description}</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[
-          styles.tab,
-          selectedTab === TOP_TAB_BARS.ADDITIONAL_DETAILS && styles.selectedTab,
-        ]}
-        onPress={() => setSelectedTab(TOP_TAB_BARS.ADDITIONAL_DETAILS)}>
-        <Text style={styles.tabText}>{localStrings.additionalDetails}</Text>
-      </TouchableOpacity>
-    </View>
+  const renderTopBar = useCallback(
+    () => (
+      <View style={styles.topBarContainer}>
+        <TouchableOpacity
+          style={[
+            styles.tab,
+            selectedTab === TOP_TAB_BARS.DESCRIPTION && styles.selectedTab,
+          ]}
+          onPress={() => setSelectedTab(TOP_TAB_BARS.DESCRIPTION)}>
+          <Text style={styles.tabText}>{localStrings.description}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.tab,
+            selectedTab === TOP_TAB_BARS.ADDITIONAL_DETAILS &&
+              styles.selectedTab,
+          ]}
+          onPress={() => setSelectedTab(TOP_TAB_BARS.ADDITIONAL_DETAILS)}>
+          <Text style={styles.tabText}>{localStrings.additionalDetails}</Text>
+        </TouchableOpacity>
+      </View>
+    ),
+    [selectedTab],
   );
 
   const renderDescription = useCallback(
@@ -202,7 +212,7 @@ const BookDetailsScreen = () => {
   const renderAdditionalDetails = useCallback(
     () => (
       <View style={styles.additionalDetailsContainer}>
-        {prepareAddtionalsDetailsData.map((item, index) => (
+        {prepareAdditionalDetailsData.map((item, index) => (
           <View key={index} style={styles.additionalDetailsItem}>
             <Text style={styles.additionalDetailsItemLabel}>{item.label}</Text>
             <Text style={styles.additionalDetailsItemValue}>
@@ -212,7 +222,22 @@ const BookDetailsScreen = () => {
         ))}
       </View>
     ),
-    [bookDetails, prepareAddtionalsDetailsData],
+    [bookDetails, prepareAdditionalDetailsData],
+  );
+
+  const renderSnackbar = useCallback(
+    () => (
+      <View>
+        <Snackbar
+          duration={1500}
+          style={styles.snackbarMessage}
+          visible={isSnackbarVisible}
+          onDismiss={() => setIsSnackbarVisible(false)}>
+          <Text style={styles.snackbarMessageText}>{snackbarMessage}</Text>
+        </Snackbar>
+      </View>
+    ),
+    [isSnackbarVisible, snackbarMessage],
   );
 
   const renderContent = useCallback(
@@ -244,6 +269,7 @@ const BookDetailsScreen = () => {
         {renderTopBar()}
         {renderContent()}
       </ScrollView>
+      {renderSnackbar()}
     </View>
   );
 };

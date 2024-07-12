@@ -23,6 +23,8 @@ export const localStrings = new LocalizedStrings({
     times: 'Times',
     favoritesList: 'Favorites List',
     emptyMessage: `Oh, you've got nothing`,
+    addedToFavorites: 'Added to favorites',
+    removeFromFavorites: 'Removed from favorites',
   },
   it: {
     rating: 'Valutazione',
@@ -46,7 +48,9 @@ export const localStrings = new LocalizedStrings({
     times: 'Epoche',
     favoritesList: 'Lista dei preferiti',
     emptyMessage: 'Oh, non hai niente',
+    addedToFavorites: 'Aggiunto ai preferiti',
+    removeFromFavorites: 'Rimosso dai preferiti',
   },
 });
 
-localStrings.setLanguage('en');
+localStrings.setLanguage('it');

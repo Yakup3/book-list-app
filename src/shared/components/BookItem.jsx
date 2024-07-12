@@ -26,8 +26,12 @@ const BookItem = React.memo(({item, handleOnPressBookItem}) => {
 
   const renderTextContainer = () => (
     <View style={styles.textContainer}>
-      <Text style={styles.bookTitle}>{item.title}</Text>
-      <Text style={styles.bookAuthor}>{item.author_name?.[0]}</Text>
+      <Text style={styles.bookTitle} numberOfLines={2} ellipsizeMode="tail">
+        {item.title}
+      </Text>
+      <Text style={styles.bookAuthor} numberOfLines={2} ellipsizeMode="tail">
+        {item.author_name?.[0]}
+      </Text>
     </View>
   );
 
