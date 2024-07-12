@@ -8,7 +8,7 @@ import {
 import colors from '../../theme/colors';
 import {ScreenHeight, ScreenWidth} from '../constants';
 
-const BookItem = ({item, handleOnPressBookItem}) => {
+const BookItem = React.memo(({item, handleOnPressBookItem}) => {
   const handleOnNavigateToDetails = () => {
     handleOnPressBookItem(item);
   };
@@ -39,7 +39,7 @@ const BookItem = ({item, handleOnPressBookItem}) => {
       {renderTextContainer()}
     </TouchableOpacity>
   );
-};
+});
 
 const styles = StyleSheet.create({
   bookItem: {
