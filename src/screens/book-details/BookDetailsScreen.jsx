@@ -76,7 +76,7 @@ const BookDetailsScreen = () => {
     [bookDetails],
   );
 
-  const prepareAddtionalsDetailsData = useMemo(
+  const prepareAdditionalDetailsData = useMemo(
     () => [
       {label: localStrings.wantToRead, value: bookDetails.want_to_read_count},
       {
@@ -212,7 +212,7 @@ const BookDetailsScreen = () => {
   const renderAdditionalDetails = useCallback(
     () => (
       <View style={styles.additionalDetailsContainer}>
-        {prepareAddtionalsDetailsData.map((item, index) => (
+        {prepareAdditionalDetailsData.map((item, index) => (
           <View key={index} style={styles.additionalDetailsItem}>
             <Text style={styles.additionalDetailsItemLabel}>{item.label}</Text>
             <Text style={styles.additionalDetailsItemValue}>
@@ -222,7 +222,7 @@ const BookDetailsScreen = () => {
         ))}
       </View>
     ),
-    [bookDetails, prepareAddtionalsDetailsData],
+    [bookDetails, prepareAdditionalDetailsData],
   );
 
   const renderSnackbar = useCallback(
