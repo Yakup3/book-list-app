@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {
   View,
   Text,
@@ -30,128 +30,149 @@ const HomeScreen = () => {
 
   const navigation = useNavigation();
 
-  const fetchBooks = (query, append = false) => {
-    if (!loading && !isLoadingMore) {
-      append ? setIsLoadingMore(true) : setLoading(true);
+  const fetchBooks = useCallback(
+    (query, append = false) => {
+      if (!loading && !isLoadingMore) {
+        append ? setIsLoadingMore(true) : setLoading(true);
 
-      fetchBookList(query, limit, append ? offset : 0)
-        .then(res => {
-          setBooks(append ? [...books, ...res.docs] : res.docs);
-          setOffset(prevOffset => prevOffset + limit);
-          setSearchResultCount(res.numFound);
-        })
-        .catch(err => {
-          console.log('error in fetch books');
-        })
-        .finally(() => {
-          append ? setIsLoadingMore(false) : setLoading(false);
-        });
-    }
-  };
+        fetchBookList(query, limit, append ? offset : 0)
+          .then(res => {
+            setBooks(prevBooks =>
+              append ? [...prevBooks, ...res.docs] : res.docs,
+            );
+            setOffset(prevOffset => prevOffset + limit);
+            setSearchResultCount(res.numFound);
+          })
+          .catch(err => {
+            console.error('Error in fetch books:', err);
+          })
+          .finally(() => {
+            append ? setIsLoadingMore(false) : setLoading(false);
+          });
+      }
+    },
+    [loading, isLoadingMore, offset, limit],
+  );
 
   const handleOnPressBookItem = item => {
     navigation.navigate(PAGES.BOOKDETAILS, {book: item});
   };
 
-  const handleSearchIconPress = () => {
+  const handleSearchIconPress = useCallback(() => {
     if (searchQuery.length > 2) {
       setIsSearchIcon(false);
-      setOffset(0);
       fetchBooks(searchQuery);
     }
-  };
+  }, [searchQuery, fetchBooks]);
 
-  const handleClearIconPress = () => {
+  const handleClearIconPress = useCallback(() => {
     if (!loading && !isLoadingMore) {
       setSearchQuery('');
       setBooks([]);
       setIsSearchIcon(true);
       setOffset(0);
     }
-  };
+  }, [loading, isLoadingMore]);
 
-  const handleLoadMoreBooks = () => {
+  const handleLoadMoreBooks = useCallback(() => {
     if (!isLoadingMore && books.length < searchResultCount) {
       fetchBooks(searchQuery, true);
     }
-  };
+  }, [isLoadingMore, books, searchResultCount, fetchBooks, searchQuery]);
 
-  const renderSearchBar = () => (
-    <View style={styles.searchBarContainer}>
-      <TextInput
-        style={styles.searchBar}
-        placeholder={localStrings.searchForBooks}
-        value={searchQuery}
-        placeholderTextColor={colors.brown.medium}
-        onChangeText={setSearchQuery}
-      />
-      <TouchableOpacity
-        onPress={isSearchIcon ? handleSearchIconPress : handleClearIconPress}
-        style={styles.iconContainer}>
-        <Icon
-          name={isSearchIcon ? 'search1' : 'close'}
-          size={22}
-          color={colors.brown.dark}
+  const renderSearchBar = useCallback(
+    () => (
+      <View style={styles.searchBarContainer}>
+        <TextInput
+          style={styles.searchBar}
+          placeholder={localStrings.searchForBooks}
+          value={searchQuery}
+          placeholderTextColor={colors.brown.medium}
+          onChangeText={setSearchQuery}
         />
-      </TouchableOpacity>
-    </View>
+        <TouchableOpacity
+          onPress={isSearchIcon ? handleSearchIconPress : handleClearIconPress}
+          style={styles.iconContainer}>
+          <Icon
+            name={isSearchIcon ? 'search1' : 'close'}
+            size={22}
+            color={colors.brown.dark}
+          />
+        </TouchableOpacity>
+      </View>
+    ),
+    [searchQuery, isSearchIcon, handleSearchIconPress, handleClearIconPress],
   );
 
-  const renderSearchResultCount = () =>
-    !loading &&
-    books.length > 0 && (
-      <Text
-        style={
-          styles.searchResultCount
-        }>{`${localStrings.searchResult}: ${books.length} / ${searchResultCount}`}</Text>
-    );
-
-  const renderBookList = () =>
-    !loading &&
-    books.length > 0 && (
-      <FlatList
-        data={books}
-        renderItem={({item}) => (
-          <BookItem item={item} handleOnPressBookItem={handleOnPressBookItem} />
-        )}
-        showsVerticalScrollIndicator={false}
-        keyExtractor={(item, index) => `${item.key}-${index}`}
-        contentContainerStyle={styles.bookList}
-        numColumns={2}
-        key={2}
-        onEndReached={handleLoadMoreBooks}
-        onEndReachedThreshold={0.2}
-        ListFooterComponent={() =>
-          isLoadingMore && (
-            <ActivityIndicator animating={true} color={colors.brown.medium} />
-          )
-        }
-      />
-    );
-
-  const renderPlaceholder = () =>
-    !loading &&
-    books.length === 0 && (
-      <View style={styles.placeholderContainer}>
-        <Image
-          source={require('../../assets/book_search.png')}
-          style={styles.placeholderImage}
-        />
-        <Text style={styles.placeholderText}>
-          {localStrings.findYourBookOfChoice}
+  const renderSearchResultCount = useCallback(
+    () =>
+      !loading &&
+      books.length > 0 && (
+        <Text style={styles.searchResultCount}>
+          {`${localStrings.searchResult}: ${books.length} / ${searchResultCount}`}
         </Text>
-      </View>
-    );
+      ),
+    [loading, books, searchResultCount],
+  );
 
-  const renderActivityIndicator = () =>
-    loading && (
-      <ActivityIndicator
-        style={styles.activityIndicator}
-        size="large"
-        animating={true}
-        color={colors.brown.medium}
-      />
-    );
+  const renderBookList = useCallback(
+    () =>
+      !loading &&
+      books.length > 0 && (
+        <FlatList
+          data={books}
+          renderItem={({item}) => (
+            <BookItem
+              item={item}
+              handleOnPressBookItem={handleOnPressBookItem}
+            />
+          )}
+          showsVerticalScrollIndicator={false}
+          keyExtractor={(item, index) => `${item.key}-${index}`}
+          contentContainerStyle={styles.bookList}
+          numColumns={2}
+          key={2}
+          onEndReached={handleLoadMoreBooks}
+          onEndReachedThreshold={0.2}
+          ListFooterComponent={() =>
+            isLoadingMore && (
+              <ActivityIndicator animating={true} color={colors.brown.medium} />
+            )
+          }
+        />
+      ),
+    [loading, books, isLoadingMore, handleOnPressBookItem, handleLoadMoreBooks],
+  );
+
+  const renderPlaceholder = useCallback(
+    () =>
+      !loading &&
+      books.length === 0 && (
+        <View style={styles.placeholderContainer}>
+          <Image
+            source={require('../../assets/book_search.png')}
+            style={styles.placeholderImage}
+          />
+          <Text style={styles.placeholderText}>
+            {localStrings.findYourBookOfChoice}
+          </Text>
+        </View>
+      ),
+    [loading, books],
+  );
+
+  const renderActivityIndicator = useCallback(
+    () =>
+      loading && (
+        <ActivityIndicator
+          style={styles.activityIndicator}
+          size="large"
+          animating={true}
+          color={colors.brown.medium}
+        />
+      ),
+    [loading],
+  );
 
   return (
     <View style={styles.container}>
